@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Session — {{ sess.code }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>{{ sess.code }} — {{ sess.course_name }}</h2>
+    <p class="subtitle">Session started {{ sess.created_at[:16] }}</p>
+  </div>
+  <a href="{{ url_for('lecturer.dashboard') }}" class="btn-outline">← Back</a>
+</div>
+
+<div class="session-layout">
+
+  <!-- QR Code Panel -->
+  <div class="qr-panel">
+    {% if is_expired %}
+      <div class="expired-badge">⚠ QR Expired</div>
+      <div class="qr-expired-overlay">
+        <div class="qr-img-wrap expired">
+          <img src="{{ url_for('static', filename='qrcodes/' + qr_image) }}" alt="QR Code">
+          <div class="overlay-text">EXPIRED</div>
+        </div>
+      </div>
+    {% else %}
+      <div class="active-badge pulse">● LIVE</div>
+      <div class="qr-img-wrap">
+        <img src="{{ url_for('static', filename='qrcodes/' + qr_image) }}" alt="QR Code" id="qrImg">
+      </div>
+    {% endif %}
+
+    <div class="qr-info">
+      <div class="qr-timer" id="qrTimer">
+        {% if not is_expired %}
+          ⏱ Expires: {{ sess.expires_at[11:16] }}
+        {% else %}
+          Session ended
+        {% endif %}
+      </div>
+      <div class="attendance-counter">
+        Students present: <strong id="liveCount">{{ attendance|length }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Attendance Table -->
+  <div class="attendance-panel">
+    <div class="panel-header">
+      <h3>Attendance <span class="count-badge" id="countBadge">{{ attendance|length }}</span></h3>
+      <a href="{{ url_for('reports.export_csv', course_id=sess.course_id) }}" class="btn-outline sm">Export CSV</a>
+    </div>
+
+    <div id="attendanceList">
+      {% if attendance %}
+      <table class="att-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Reg No</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="attBody">
+          {% for i, row in enumerate(attendance) if False %}{% endfor %}
+          {% for row in attendance %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ row.name }}</td>
+            <td class="mono">{{ row.reg_no }}</td>
+            <td>{{ row.timestamp[11:19] }}</td>
+            <td><span class="status-badge present">{{ row.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">👥</div>
+          <p>Waiting for students to scan...</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SESSION_ID  = {{ sess.id }};
+const IS_EXPIRED  = {{ 'true' if is_expired else 'false' }};
+
+// Auto-refresh attendance every 5 seconds
+if (!IS_EXPIRED) {
+  setInterval(async () => {
+    const res  = await fetch(`/lecturer/session/${SESSION_ID}/live`);
+    const data = await res.json();
+
+    document.getElementById('liveCount').textContent  = data.count;
+    document.getElementById('countBadge').textContent = data.count;
+
+    if (data.count > 0) {
+      let html = `<table class="att-table">
+        <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody>`;
+      data.students.forEach((s, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${s.name}</td>
+          <td class="mono">${s.reg_no}</td>
+          <td>${s.timestamp.slice(11,19)}</td>
+          <td><span class="status-badge present">present</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('attendanceList').innerHTML = html;
+    }
+  }, 5000);
+}
+</script>
+{% endblock %}

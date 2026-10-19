@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}My Attendance History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Attendance History</h2>
+    <p class="subtitle">All your attendance records — {{ name }}</p>
+  </div>
+  <a href="{{ url_for('student.dashboard') }}" class="btn-outline">← Back</a>
+</div>
+
+<table class="att-table">
+  <thead>
+    <tr><th>#</th><th>Course</th><th>Lecturer</th><th>Date</th><th>Time</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><strong>{{ r.code }}</strong> — {{ r.course_name }}</td>
+      <td>{{ r.lecturer_name }}</td>
+      <td>{{ r.timestamp[:10] }}</td>
+      <td>{{ r.timestamp[11:19] }}</td>
+      <td><span class="status-badge present">{{ r.status }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="text-center">No attendance records yet. Scan a QR code in class!</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

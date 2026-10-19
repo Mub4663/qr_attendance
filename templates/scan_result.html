@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Scan Result{% endblock %}
+
+{% block content %}
+<div class="scan-result-wrapper">
+  <div class="result-card {% if success %}success{% else %}error{% endif %}">
+    <div class="result-icon">{{ '✓' if success else '✗' }}</div>
+    <h2>{{ 'Attendance Marked!' if success else 'Could Not Mark' }}</h2>
+    <p class="result-message">{{ message }}</p>
+    {% if success %}
+      <div class="result-details">
+        <span>📅 {{ date }}</span>
+        <span>⏰ {{ time }}</span>
+      </div>
+    {% endif %}
+    <a href="{{ url_for('student.dashboard') }}" class="btn-primary">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

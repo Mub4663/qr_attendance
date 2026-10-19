@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Lecturer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Welcome, <span class="accent">{{ name }}</span></h2>
+    <p class="subtitle">Manage your courses and generate QR attendance codes</p>
+  </div>
+  <button class="btn-primary" onclick="toggleModal('addCourseModal')">+ Add Course</button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num">{{ stats|length }}</div>
+    <div class="stat-label">Courses</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ stats|sum(attribute='total_sessions') }}</div>
+    <div class="stat-label">Total Sessions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ stats|sum(attribute='total_attendance') }}</div>
+    <div class="stat-label">Attendance Records</div>
+  </div>
+</div>
+
+<!-- Course Cards -->
+<div class="courses-grid">
+{% for item in stats %}
+  <div class="course-card">
+    <div class="course-header">
+      <div>
+        <h3>{{ item.course.code }}</h3>
+        <p>{{ item.course.name }}</p>
+      </div>
+      <span class="level-badge">{{ item.course.level }}L</span>
+    </div>
+
+    <div class="course-stats">
+      <div>
+        <span class="stat-num-sm">{{ item.total_sessions }}</span>
+        <span class="stat-label-sm">Sessions</span>
+      </div>
+      <div>
+        <span class="stat-num-sm">{{ item.total_attendance }}</span>
+        <span class="stat-label-sm">Records</span>
+      </div>
+    </div>
+
+    <div class="course-actions">
+      <!-- Generate QR -->
+      <form method="POST" action="{{ url_for('lecturer.generate_qr', course_id=item.course.id) }}" style="display:inline">
+        <button type="submit" class="btn-primary sm">Generate QR</button>
+      </form>
+      <!-- History -->
+      <a href="{{ url_for('lecturer.course_history', course_id=item.course.id) }}" class="btn-outline sm">History</a>
+      <!-- Report -->
+      <a href="{{ url_for('reports.summary', course_id=item.course.id) }}" class="btn-outline sm">Report</a>
+      <!-- Export CSV -->
+      <a href="{{ url_for('reports.export_csv', course_id=item.course.id) }}" class="btn-ghost sm">CSV</a>
+    </div>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📚</div>
+    <p>No courses yet. Add your first course to get started.</p>
+  </div>
+{% endfor %}
+</div>
+
+
+<!-- ── ADD COURSE MODAL ───────────────────── -->
+<div id="addCourseModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add New Course</h3>
+      <button onclick="toggleModal('addCourseModal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('lecturer.add_course') }}" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Course Code</label>
+          <input type="text" name="code" placeholder="CSC4301" required>
+        </div>
+        <div class="form-group">
+          <label>Course Name</label>
+          <input type="text" name="name" placeholder="Artificial Intelligence" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Department</label>
+          <select name="department" required>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Software Engineering">Software Engineering</option>
+            <option value="Information Technology">Information Technology</option>
+            <option value="Cyber Security">Cyber Security</option>
+            <option value="Mathematics">Mathematics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Level</label>
+          <select name="level" required>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="300">300</option>
+            <option value="400" selected>400</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary full-width">Add Course</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

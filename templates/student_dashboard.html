@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Hello, <span class="accent">{{ name }}</span></h2>
+    <p class="subtitle">Your attendance overview</p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('student.scan_manual') }}" class="btn-primary">Scan QR Code</a>
+    <button class="btn-outline" onclick="toggleModal('enrollModal')">+ Enroll Course</button>
+  </div>
+</div>
+
+<!-- Attendance Summary Cards -->
+<div class="courses-grid">
+{% for item in summary %}
+  {% set pct = item.percentage %}
+  <div class="course-card">
+    <div class="course-header">
+      <div>
+        <h3>{{ item.course.code }}</h3>
+        <p>{{ item.course.name }}</p>
+        <small class="text-muted">{{ item.course.lecturer_name }}</small>
+      </div>
+      <span class="level-badge">{{ item.course.level }}L</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill {% if pct >= 75 %}good{% elif pct >= 50 %}warn{% else %}bad{% endif %}"
+             style="width: {{ pct }}%"></div>
+      </div>
+      <span class="progress-label {% if pct >= 75 %}good{% elif pct >= 50 %}warn{% else %}bad{% endif %}">
+        {{ pct }}%
+      </span>
+    </div>
+
+    <div class="course-stats">
+      <div>
+        <span class="stat-num-sm">{{ item.attended }}</span>
+        <span class="stat-label-sm">Attended</span>
+      </div>
+      <div>
+        <span class="stat-num-sm">{{ item.total_sessions }}</span>
+        <span class="stat-label-sm">Total</span>
+      </div>
+      <div>
+        <span class="stat-num-sm {% if pct >= 75 %}good{% else %}bad{% endif %}">
+          {% if pct >= 75 %}✓ OK{% else %}⚠ LOW{% endif %}
+        </span>
+        <span class="stat-label-sm">Status</span>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🎓</div>
+    <p>No courses enrolled. Click <strong>Enroll Course</strong> to get started.</p>
+  </div>
+{% endfor %}
+</div>
+
+<!-- Recent Activity -->
+{% if recent %}
+<div class="section-header">
+  <h3>Recent Attendance</h3>
+  <a href="{{ url_for('student.history') }}" class="btn-ghost sm">View all</a>
+</div>
+<table class="att-table">
+  <thead>
+    <tr><th>Course</th><th>Date</th><th>Time</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for r in recent %}
+    <tr>
+      <td><strong>{{ r.code }}</strong> — {{ r.course_name }}</td>
+      <td>{{ r.timestamp[:10] }}</td>
+      <td>{{ r.timestamp[11:19] }}</td>
+      <td><span class="status-badge present">{{ r.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+
+<!-- ── ENROLL MODAL ─────────────────────────── -->
+<div id="enrollModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Enroll in a Course</h3>
+      <button onclick="toggleModal('enrollModal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('student.enroll') }}" class="auth-form">
+      <div class="form-group">
+        <label>Course Code</label>
+        <input type="text" name="course_code" placeholder="e.g. CSC4301" required>
+        <small>Ask your lecturer for the course code.</small>
+      </div>
+      <button type="submit" class="btn-primary full-width">Enroll</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

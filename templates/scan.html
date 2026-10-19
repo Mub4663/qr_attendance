@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Scan QR{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper centered">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-icon">◈</div>
+      <h1>Scan QR Code</h1>
+      <p>Point your camera at the lecturer's QR code, or enter the token manually.</p>
+    </div>
+
+    <!-- Camera Scanner (uses device camera) -->
+    <div class="camera-section">
+      <video id="cameraPreview" autoplay playsinline></video>
+      <button class="btn-primary full-width" id="startCamera">📷 Open Camera</button>
+      <p class="hint">When the QR is detected, attendance is marked automatically.</p>
+    </div>
+
+    <div class="divider"><span>or enter manually</span></div>
+
+    <form method="POST" action="{{ url_for('student.scan_manual') }}" class="auth-form">
+      <div class="form-group">
+        <label>QR Token</label>
+        <input type="text" name="token" placeholder="Paste token here..." class="mono" required>
+      </div>
+      <button type="submit" class="btn-outline full-width">Submit Token</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endblock %}

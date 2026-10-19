@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}QR Attendance{% endblock %} — ADUSTECH</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+{% if session.user_id %}
+<!-- ── NAVBAR ─────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="nav-icon">◈</span>
+    <span class="nav-title">QR<span class="accent">Attend</span></span>
+  </div>
+  <div class="nav-links">
+    {% if session.role == 'lecturer' %}
+      <a href="{{ url_for('lecturer.dashboard') }}">Dashboard</a>
+    {% elif session.role == 'student' %}
+      <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('student.scan_manual') }}">Scan QR</a>
+      <a href="{{ url_for('student.history') }}">History</a>
+    {% elif session.role == 'admin' %}
+      <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+    {% endif %}
+  </div>
+  <div class="nav-user">
+    <span class="user-badge {{ session.role }}">{{ session.role }}</span>
+    <span class="user-name">{{ session.user_name }}</span>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ── FLASH MESSAGES ─────────────────────────── -->
+<div class="flash-container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">
+      <span>{{ message }}</span>
+      <button onclick="this.parentElement.remove()">✕</button>
+    </div>
+  {% endfor %}
+{% endwith %}
+</div>
+
+<!-- ── MAIN CONTENT ───────────────────────────── -->
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

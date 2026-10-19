@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <!-- Logo/Brand -->
+    <div class="auth-brand">
+      <div class="brand-icon">◈</div>
+      <h1>QR<span class="accent">Attend</span></h1>
+      <p>Aliko Dangote University of Science & Technology</p>
+    </div>
+
+    <!-- Login Form -->
+    <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+
+      <!-- Role Selector -->
+      <div class="role-selector">
+        <label>
+          <input type="radio" name="role" value="student" checked>
+          <span>Student</span>
+        </label>
+        <label>
+          <input type="radio" name="role" value="lecturer">
+          <span>Lecturer</span>
+        </label>
+        <label>
+          <input type="radio" name="role" value="admin">
+          <span>Admin</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="your@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-primary full-width">Sign In</button>
+    </form>
+
+    <p class="auth-footer">
+      New student? <a href="{{ url_for('auth.register') }}">Create account</a>
+    </p>
+  </div>
+
+  <!-- Decorative side -->
+  <div class="auth-visual">
+    <div class="visual-content">
+      <div class="qr-demo">
+        <div class="qr-grid">
+          {% for i in range(25) %}
+            <div class="qr-cell {% if i in [0,1,2,3,5,6,7,9,12,14,17,19,21,22,23,24] %}filled{% endif %}"></div>
+          {% endfor %}
+        </div>
+      </div>
+      <h2>Smart Attendance</h2>
+      <p>Scan. Mark. Done.<br>No more paper. No more proxy.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

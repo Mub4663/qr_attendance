@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Admin Dashboard</h2>
+    <p class="subtitle">System overview — ADUSTECH QR Attendance</p>
+  </div>
+  <button class="btn-primary" onclick="toggleModal('addLecturerModal')">+ Add Lecturer</button>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num">{{ total_students }}</div>
+    <div class="stat-label">Students</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_lecturers }}</div>
+    <div class="stat-label">Lecturers</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_courses }}</div>
+    <div class="stat-label">Courses</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_sessions }}</div>
+    <div class="stat-label">Sessions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_attendance }}</div>
+    <div class="stat-label">Records</div>
+  </div>
+</div>
+
+<!-- Recent Sessions -->
+<div class="section-header">
+  <h3>Recent Sessions</h3>
+</div>
+<table class="att-table">
+  <thead>
+    <tr><th>Course</th><th>Lecturer</th><th>Date</th><th>Students</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for s in recent_sessions %}
+    <tr>
+      <td><strong>{{ s.code }}</strong> — {{ s.course_name }}</td>
+      <td>{{ s.lecturer_name }}</td>
+      <td>{{ s.created_at[:16] }}</td>
+      <td>{{ s.count }}</td>
+      <td>
+        <span class="status-badge {{ 'present' if s.is_active else 'absent' }}">
+          {{ 'Active' if s.is_active else 'Closed' }}
+        </span>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="text-center">No sessions yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ── ADD LECTURER MODAL ──────────────────── -->
+<div id="addLecturerModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add Lecturer</h3>
+      <button onclick="toggleModal('addLecturerModal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('admin.add_lecturer') }}" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Staff ID</label>
+          <input type="text" name="staff_id" placeholder="STAFF/001" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label>Department</label>
+        <select name="department" required>
+          <option value="Computer Science">Computer Science</option>
+          <option value="Software Engineering">Software Engineering</option>
+          <option value="Information Technology">Information Technology</option>
+          <option value="Mathematics">Mathematics</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Default Password</label>
+        <input type="text" name="password" value="lecturer123" required>
+      </div>
+      <button type="submit" class="btn-primary full-width">Add Lecturer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
